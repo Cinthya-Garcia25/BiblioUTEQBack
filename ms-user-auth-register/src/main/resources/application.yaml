@@ -1,0 +1,41 @@
+server:
+  port: 8081
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: ms-user-auth-register
+
+  # ==========================================
+  # CONFIGURACIÓN DE POSTGRESQL (JPA/HIBERNATE)
+  # ==========================================
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/user_db
+    username: postgres
+    password: Admin2024!
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update # Hibernate creará las tablas en Postgres basándose en tus entidades Java
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# AÑADE ESTE BLOQUE DE EUREKA:
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/ # La URL de tus páginas amarillas
+  instance:
+    preferIpAddress: true # Recomendado para entornos Docker/WSL para evitar problemas de DNS
+
+  # ==========================================
+  # CONFIGURACIÓN DE REDIS CACHE
+  # ==========================================
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
