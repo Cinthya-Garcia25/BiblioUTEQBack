@@ -1,10 +1,10 @@
-package com.scrip.operaciones;
+package com.scrip.msdevoluciones;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class OperacionesApplicationTests {
+class MsDevolucionesApplicationTests {
 
     @Test
     void contextLoads() {

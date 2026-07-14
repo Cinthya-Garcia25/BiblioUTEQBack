@@ -1,4 +1,4 @@
-package com.scrip.operaciones.entity;
+package com.scrip.msdevoluciones.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,10 +21,8 @@ public class Devolucion {
     @GeneratedValue
     private UUID id;
 
-    // Relación Uno a Uno con Préstamo debido a la restricción UNIQUE en la base de datos
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prestamo_id", referencedColumnName = "id", nullable = false, unique = true)
-    private Prestamo prestamo;
+    // Relación Uno a Uno con Préstamo debido a la restricción UNIQUE en la base de datos (consultar el objeto en el ms-prestamos con OpenFeign)
+    private UUID prestamo;
 
     @Builder.Default
     @Column(name = "fecha_devolucion", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT now()")

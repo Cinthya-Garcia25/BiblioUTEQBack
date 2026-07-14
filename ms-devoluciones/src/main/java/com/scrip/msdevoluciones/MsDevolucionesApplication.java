@@ -1,13 +1,13 @@
-package com.scrip.operaciones;
+package com.scrip.msdevoluciones;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OperacionesApplication {
+public class MsDevolucionesApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OperacionesApplication.class, args);
+        SpringApplication.run(MsDevolucionesApplication.class, args);
     }
 
 }

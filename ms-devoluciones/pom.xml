@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.scrip</groupId>
-    <artifactId>operaciones</artifactId>
+    <artifactId>ms-devoluciones</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>operaciones</name>
-    <description>operaciones</description>
+    <name>ms-devoluciones</name>
+    <description>ms-devoluciones</description>
     <url/>
     <licenses>
         <license/>
