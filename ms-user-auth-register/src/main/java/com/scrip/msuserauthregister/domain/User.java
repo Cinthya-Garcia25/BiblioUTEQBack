@@ -34,6 +34,10 @@ public class User {
     @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
 
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean activo = true;
+
     @PrePersist
     protected void onCreate() {
         this.fechaRegistro = LocalDateTime.now();
