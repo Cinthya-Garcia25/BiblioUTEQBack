@@ -3,6 +3,9 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: ms-user-auth-register
 
@@ -10,18 +13,24 @@ spring:
   # CONFIGURACIÓN DE POSTGRESQL (JPA/HIBERNATE)
   # ==========================================
   datasource:
-    url: jdbc:postgresql://db.chxavcfzhsifgskhhrkh.supabase.co:5432/postgres
-    username: postgres.chxavcfzhsifgskhhrkh
-    password: 019f5e72-efde-7eb5-bcd3-999e2dc610f8
+    url: ${IDENTIDAD_DB_URL}
+    username: ${IDENTIDAD_DB_USERNAME}
+    password: ${IDENTIDAD_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: identidad
+      maximum-pool-size: ${IDENTIDAD_DB_POOL_SIZE:5}
+      minimum-idle: ${IDENTIDAD_DB_MIN_IDLE:1}
+      connection-timeout: 10000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update # Hibernate creará las tablas en Postgres basándose en tus entidades Java
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
+        default_schema: identidad
         format_sql: true
 
 # AÑADE ESTE BLOQUE DE EUREKA:
