@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @Configuration
 public class AuthorizationServerConfig {
@@ -80,9 +81,26 @@ public class AuthorizationServerConfig {
 
             Set<String> roles = context.getPrincipal().getAuthorities().stream()
                     .map(authority -> authority.getAuthority().replaceFirst("^ROLE_", ""))
+                    .filter(role -> !role.startsWith("SCOPE_"))
                     .collect(Collectors.toSet());
 
-            context.getClaims().claim("roles", roles);
+            Object principal = context.getPrincipal().getPrincipal();
+            if (principal instanceof CustomUserDetails userDetails) {
+                context.getClaims().claim("roles", roles);
+                context.getClaims().claim("user_id", userDetails.getId().toString());
+                context.getClaims().claim("email", userDetails.getUsername());
+            } else if (context.getAuthorization() != null
+                    && context.getAuthorization().getAccessToken() != null) {
+                // En refresh_token el principal es el cliente. Conservamos los claims
+                // de identidad emitidos en el access token original.
+                Map<String, Object> previousClaims = context.getAuthorization().getAccessToken().getClaims();
+                if (previousClaims != null) {
+                    previousClaims.entrySet().stream()
+                            .filter(entry -> Set.of("roles", "user_id", "email").contains(entry.getKey()))
+                            .filter(entry -> entry.getValue() != null)
+                            .forEach(entry -> context.getClaims().claim(entry.getKey(), entry.getValue()));
+                }
+            }
         };
     }
 }

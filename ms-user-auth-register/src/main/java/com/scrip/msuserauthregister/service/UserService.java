@@ -6,6 +6,13 @@ import com.scrip.msuserauthregister.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.scrip.msuserauthregister.dto.AdminUserRequest;
+import com.scrip.msuserauthregister.dto.UserResponse;
+import com.scrip.msuserauthregister.dto.UserStatusResponse;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,5 +37,82 @@ public class UserService {
 
         // 3. Guardar en Postgres
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> findAllActive() {
+        return userRepository.findAllByActivoTrueOrderByNombreCompletoAsc().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse findById(UUID id) {
+        return toResponse(requireActive(id));
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatusResponse findStatusById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        return new UserStatusResponse(user.getEmail(), user.getRol(), user.isActivo());
+    }
+
+    @Transactional
+    public UserResponse create(AdminUserRequest request) {
+        if (request.password() == null || request.password().isBlank()) {
+            throw new IllegalArgumentException("La contrasena es obligatoria al crear un usuario");
+        }
+        ensureUniqueEmail(request.email(), null);
+        User user = User.builder()
+                .nombreCompleto(request.nombreCompleto().trim())
+                .email(request.email().trim().toLowerCase())
+                .password(passwordEncoder.encode(request.password()))
+                .rol(request.rol())
+                .activo(true)
+                .build();
+        return toResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserResponse update(UUID id, AdminUserRequest request) {
+        User user = requireActive(id);
+        ensureUniqueEmail(request.email(), id);
+        user.setNombreCompleto(request.nombreCompleto().trim());
+        user.setEmail(request.email().trim().toLowerCase());
+        user.setRol(request.rol());
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
+        return toResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public void softDelete(UUID id, String authenticatedEmail) {
+        User user = requireActive(id);
+        if (user.getEmail().equalsIgnoreCase(authenticatedEmail)) {
+            throw new IllegalArgumentException("No puedes eliminar tu propio usuario");
+        }
+        user.setActivo(false);
+        userRepository.save(user);
+    }
+
+    private User requireActive(UUID id) {
+        return userRepository.findById(id)
+                .filter(User::isActivo)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
+
+    private void ensureUniqueEmail(String email, UUID currentId) {
+        userRepository.findByEmail(email.trim().toLowerCase()).ifPresent(existing -> {
+            if (currentId == null || !existing.getId().equals(currentId)) {
+                throw new IllegalArgumentException("El correo electronico ya esta registrado");
+            }
+        });
+    }
+
+    private UserResponse toResponse(User user) {
+        return new UserResponse(user.getId(), user.getNombreCompleto(), user.getEmail(),
+                user.getRol(), user.getFechaRegistro(), user.isActivo());
     }
 }
