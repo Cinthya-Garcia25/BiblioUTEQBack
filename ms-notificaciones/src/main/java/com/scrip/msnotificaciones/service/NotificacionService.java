@@ -34,6 +34,8 @@ public class NotificacionService {
             case DEVOLUCION_REGISTRADA -> "DEVOLUCIÓN REGISTRADA";
             case SANCION_GENERADA -> "SANCIÓN GENERADA";
             case RESERVA_POR_EXPIRAR -> "RESERVA POR EXPIRAR";
+            case RESERVA_CREADA -> "RESERVA CREADA";
+            case RESERVA_CANCELADA -> "RESERVA CANCELADA";
         };
 
         System.out.println(String.format(
