@@ -13,4 +13,6 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, UUID> {
             OffsetDateTime fechaInicio,
             OffsetDateTime fechaFinExclusiva
     );
+
+    List<Prestamo> findByUsuarioId(UUID usuarioId);
 }

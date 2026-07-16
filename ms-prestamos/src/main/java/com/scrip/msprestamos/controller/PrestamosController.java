@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +33,17 @@ public class PrestamosController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error inesperado al registrar el préstamo: " + e.getMessage()));
         }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<List<Prestamo>> listarPrestamos() {
+        return ResponseEntity.ok(prestamoService.listarPrestamos());
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Prestamo>> listarPrestamosDeUsuario(@PathVariable UUID usuarioId) {
+        return ResponseEntity.ok(prestamoService.listarPrestamosDeUsuario(usuarioId));
     }
 
     @GetMapping("/{id}")
