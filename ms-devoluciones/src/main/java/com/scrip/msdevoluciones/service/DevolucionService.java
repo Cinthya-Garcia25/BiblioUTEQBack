@@ -2,6 +2,7 @@ package com.scrip.msdevoluciones.service;
 
 import com.scrip.msdevoluciones.client.NotificacionClient;
 import com.scrip.msdevoluciones.client.PrestamoClient;
+import com.scrip.msdevoluciones.dto.DevolucionDto;
 import com.scrip.msdevoluciones.dto.DevolucionRequest;
 import com.scrip.msdevoluciones.dto.PrestamoDto;
 import com.scrip.msdevoluciones.entity.Devolucion;
@@ -10,9 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +107,26 @@ public class DevolucionService {
         notificacionClient.enviarNotificacion(notificationRequest);
 
         return devolucion;
+    }
+
+    public List<DevolucionDto> listarDevoluciones(UUID usuarioId, UUID libroId, LocalDate desde, LocalDate hasta) {
+        return devolucionRepository.findAllByOrderByFechaDevolucionDesc().stream()
+                .map(devolucion -> {
+                    PrestamoDto prestamo = prestamoClient.obtenerPrestamoPorId(devolucion.getPrestamo());
+                    return DevolucionDto.builder()
+                            .id(devolucion.getId())
+                            .prestamoId(devolucion.getPrestamo())
+                            .usuarioId(prestamo.getUsuarioId())
+                            .libroId(prestamo.getLibroId())
+                            .fechaDevolucion(devolucion.getFechaDevolucion())
+                            .tardia(devolucion.getTardia())
+                            .diasRetraso(devolucion.getDiasRetraso())
+                            .build();
+                })
+                .filter(dto -> usuarioId == null || usuarioId.equals(dto.getUsuarioId()))
+                .filter(dto -> libroId == null || libroId.equals(dto.getLibroId()))
+                .filter(dto -> desde == null || !dto.getFechaDevolucion().toLocalDate().isBefore(desde))
+                .filter(dto -> hasta == null || !dto.getFechaDevolucion().toLocalDate().isAfter(hasta))
+                .toList();
     }
 }
